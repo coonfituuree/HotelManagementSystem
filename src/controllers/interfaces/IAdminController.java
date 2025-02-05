@@ -4,8 +4,9 @@ import models.Admin;
 
 public interface IAdminController {
     String createAdmin(Admin admin);
-    String getAdminByUsername(String username);
+    Admin getAdminByUsername(String username);  // <-- ДОЛЖНО БЫТЬ ТАК
     String getAllAdmins();
     String updateAdminRole(int id, String newRole);
     String deleteAdmin(int id);
 }
+

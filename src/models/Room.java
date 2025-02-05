@@ -9,7 +9,7 @@ public class Room {
     private String createdAt;
 
     // Конструкторы
-    public Room() {}
+    public Room(Integer o, String roomNumber, String roomType, double price, String status, Object createdAt) {}
 
     public Room(String roomNumber, String roomType, double price, String status, String createdAt) {
         this.roomNumber = roomNumber;

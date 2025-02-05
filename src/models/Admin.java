@@ -8,7 +8,7 @@ public class Admin {
     private String createdAt;
 
     // Конструкторы
-    public Admin() {}
+    public Admin(int id, String firstName, String lastName, String email, String password, String role) {}
 
     public Admin(String username, String password, String role, String createdAt) {
         this.username = username;

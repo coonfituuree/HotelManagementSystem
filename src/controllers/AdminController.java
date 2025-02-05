@@ -20,9 +20,13 @@ public class AdminController implements IAdminController {
     }
 
     @Override
-    public String getAdminByUsername(String username) {
-        Admin admin = repository.getAdminByUsername(username);
-        return admin != null ? admin.toString() : "Admin not found.";
+    public Admin getAdminByUsername(String username) {
+        return repository.getAdminByUsername(username);
+    }
+
+    // ✅ Новый метод для поиска администратора по email
+    public Admin getAdminByEmail(String email) {
+        return repository.getAdminByEmail(email);
     }
 
     @Override

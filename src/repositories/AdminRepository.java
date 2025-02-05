@@ -51,6 +51,29 @@ public class AdminRepository implements IAdminRepository {
         } catch (SQLException e) {
             System.out.println("SQL Error: " + e.getMessage());
         }
+        return null; // Если не найден, возвращаем null
+    }
+
+    @Override
+    public Admin getAdminByEmail(String email) {
+        String sql = "SELECT * FROM admins WHERE email = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Admin(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email"),
+                        rs.getString("password"),
+                        rs.getString("role")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

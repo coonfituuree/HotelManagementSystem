@@ -9,4 +9,5 @@ public interface IAdminRepository {
     List<Admin> getAllAdmins();
     boolean updateAdminRole(int id, String newRole);
     boolean deleteAdmin(int id);
+    Admin getAdminByEmail(String email);
 }

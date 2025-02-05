@@ -139,5 +139,52 @@ public class BookingRepository implements IBookingRepository {
         }
     }
 
+    @Override
+    public List<Booking> getBookingsByCustomerId(int customerId) {
+        List<Booking> bookings = new ArrayList<>();
+        String sql = "SELECT * FROM bookings WHERE customer_id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, customerId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                bookings.add(new Booking(
+                        rs.getInt("id"),
+                        rs.getInt("customer_id"),
+                        rs.getInt("room_id"),
+                        rs.getString("check_in_date"),
+                        rs.getString("check_out_date"),
+                        rs.getString("status"),
+                        null
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+    @Override
+    public int createBooking1(Booking booking) {
+        String sql = "INSERT INTO bookings (customer_id, room_id, check_in_date, check_out_date, status, created_at) " +
+                "VALUES (?, ?, ?, ?, ?, NOW()) RETURNING id";
+        try (Connection conn = db.getConnection();
+             PreparedStatement st = conn.prepareStatement(sql)) {
+
+            st.setInt(1, booking.getCustomerId());
+            st.setInt(2, booking.getRoomId());
+            st.setString(3, booking.getCheckInDate());
+            st.setString(4, booking.getCheckOutDate());
+            st.setString(5, booking.getStatus());
+
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id"); // Возвращаем ID созданного бронирования
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // Если ошибка
+    }
+
 
 }

@@ -25,10 +25,17 @@ public class BookingController implements IBookingController {
         return booking != null ? booking.toString() : "Booking not found.";
     }
 
+    public List<Booking> getBookingsByCustomerId(int customerId) {
+        return repository.getBookingsByCustomerId(customerId);
+    }
+
+    public int createBooking1(Booking booking) {
+        return repository.createBooking1(booking);
+    }
+
     @Override
-    public String getAllBookings() {
-        List<Booking> bookings = repository.getAllBookings();
-        return bookings.isEmpty() ? "No bookings found." : bookings.toString();
+    public List<Booking> getAllBookings() {
+        return repository.getAllBookings();
     }
 
     @Override

@@ -79,29 +79,31 @@ public class MyApplication {
         }
     }
 
-    public void loginCustomer(){
+    public void loginCustomer() {
         System.out.println("\n=== Login ===");
         System.out.print("Enter email: ");
         String email = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        Customer customer = customerController.getCustomerByEmail(email);
-        if(customer != null && customer.getPassword().equals(password)){
-            currentCustomer = customer;
-            System.out.println("Login successful! Welcome," + customer.getFirst_name() + "!");
-            customerMainMenu();
-        } else {
-            System.out.println("Invalid email or password! Please try again.");
-        }
+        Optional.ofNullable(customerController.getCustomerByEmail(email))
+                .filter(customer -> customer.getPassword().equals(password))
+                .ifPresentOrElse(
+                        customer -> {
+                            currentCustomer = customer;
+                            System.out.println("Login successful! Welcome, " + customer.getFirst_name() + "!");
+                            customerMainMenu();
+                        },
+                        () -> System.out.println("Invalid email or password! Please try again.")
+                );
     }
+
 
     private void customerMainMenu() {
         while (true) {
             System.out.println("\n=== CUSTOMER MENU ===");
             System.out.println("1. View all rooms");
             System.out.println("2. View my bookings");
-            System.out.println("3. Make a payment");
             System.out.println("0. Logout");
             System.out.print("Choose an option: ");
 
@@ -111,7 +113,6 @@ public class MyApplication {
             switch (choice) {
                 case 1 -> showRooms();
                 case 2 -> showMyBookings();
-                case 3 -> makeapayment();
                 case 0 -> {
                     currentCustomer = null;
                     System.out.println("Logged out successfully.");
@@ -147,14 +148,13 @@ public class MyApplication {
         String response = bookingController.createBooking(booking);
 
         if (response.contains("successfully")) {
-            System.out.println("Booking confirmed! Please make a payment at our building using your Booking ID, which you can find in 'View My Bookings");
+            System.out.println("Booking confirmed! Please make a payment at our reseption using your Booking ID, which you can find in 'View My Bookings");
         } else {
             System.out.println("Booking failed! Try again.");
         }
     }
 
 
-    private void makeapayment() {}
     private void showMyBookings() {
         if (currentCustomer == null) {
             System.out.println("You are not logged in. Please log in first.");
@@ -226,20 +226,19 @@ public class MyApplication {
         }
     }
 
-    private void showRooms1(){
+    private void showRooms1() {
         System.out.println("\n=== All Rooms ===");
-        List<Room> rooms = roomController.getAllRoomsList();
-        if (rooms.isEmpty()) {
-            System.out.println("No available rooms at the moment.");
-            return;
-        }
 
-        for (Room room : rooms) {
-            System.out.println(room.getId() + ". " + room.getRoomNumber() + " - " + room.getRoomType() +
-                    " - $" + room.getPrice() + " per night");
-        }
-
+        Optional.ofNullable(roomController.getAllRoomsList())
+                .filter(rooms -> !rooms.isEmpty())
+                .ifPresentOrElse(
+                        rooms -> rooms.forEach(room ->
+                                System.out.println(room.getId() + ". " + room.getRoomNumber() + " - "
+                                        + room.getRoomType() + " - $" + room.getPrice() + " per night")),
+                        () -> System.out.println("No available rooms at the moment.")
+                );
     }
+
     private void addRoom() {
         System.out.println("\n=== Add New Room ===");
         System.out.print("Enter room number: ");
@@ -255,7 +254,7 @@ public class MyApplication {
         System.out.print("Enter status (Available/Booked): ");
         String status = scanner.nextLine();
 
-        Room newRoom = new Room(null, roomNumber, roomType, price, status, null);
+        Room newRoom = new Room(roomNumber, roomType, price, status, null);
         String response = roomController.createRoom(newRoom);
 
         if (response.contains("successfully")) {
@@ -285,12 +284,12 @@ public class MyApplication {
 
     private void cancelBooking() {
         System.out.print("Enter booking ID to cancel: ");
-        int bookingId = scanner.nextInt();
-        scanner.nextLine();
 
-        String response = bookingController.cancelBooking(bookingId);
-        System.out.println(response);
+        Optional.of(scanner.nextInt())
+                .ifPresent(bookingId -> {
+                    scanner.nextLine();
+                    System.out.println(bookingController.cancelBooking(bookingId));
+                });
     }
-
 
 }

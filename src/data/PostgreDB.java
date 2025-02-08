@@ -6,26 +6,42 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class PostgreDB implements IDB {
-    private final String connectionUrl;
-    private final String username;
-    private final String password;
+    private static PostgreDB instance;
     private Connection connection;
+    private final String url = "jdbc:postgresql://localhost/DBManagementSystem";
+    private final String user = "postgres";
+    private final String password = "1234";
 
-    public PostgreDB(String host, String username, String password, String dbName) {
-        this.username = username;
-        this.password = password;
-        this.connectionUrl = "jdbc:postgresql://" + host + "/" + dbName;
+    private PostgreDB() {
+        connect();
+    }
+
+    private void connect() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                connection = DriverManager.getConnection(url, user, password);
+                System.out.println("Connected to database.");
+            }
+        } catch (SQLException e) {
+            System.out.println("Database connection failed: " + e.getMessage());
+        }
+    }
+
+    public static PostgreDB getInstance() {
+        if (instance == null) {
+            instance = new PostgreDB();
+        }
+        return instance;
     }
 
     @Override
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                Class.forName("org.postgresql.Driver");
-                connection = DriverManager.getConnection(connectionUrl, username, password);
+                connect(); // Восстанавливаем соединение
             }
-        } catch (Exception e) {
-            System.out.println("Failed to connect to database: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("Failed to get connection: " + e.getMessage());
         }
         return connection;
     }

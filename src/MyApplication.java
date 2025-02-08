@@ -1,9 +1,11 @@
 import controllers.*;
 import data.PostgreDB;
 import data.interfaces.IDB;
+import factories.ControllerFactory;
 import models.*;
 import repositories.*;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class MyApplication {
@@ -15,19 +17,15 @@ public class MyApplication {
     private final Scanner scanner;
     private Customer currentCustomer = null;
 
-    public MyApplication() {
-        IDB db = new PostgreDB(
-                "localhost",
-                "postgres",
-                "1234",
-                "DBManagementSystem"
-        );
+    public MyApplication() throws SQLException {
+        IDB db = PostgreDB.getInstance();
+        ControllerFactory factory = new ControllerFactory(db);
 
-        this.customerController = new CustomerController(new CustomerRepository(db));
-        this.roomController = new RoomController(new RoomRepository(db));
-        this.bookingController = new BookingController(new BookingRepository(db));
-        this.paymentController = new PaymentController(new PaymentRepository(db));
-        this.adminController = new AdminController(new AdminRepository(db));
+        this.customerController = factory.createCustomerController();
+        this.roomController = factory.createRoomController();
+        this.bookingController = factory.createBookingController();
+        this.paymentController = factory.createPaymentController();
+        this.adminController = factory.createAdminController();
 
         this.scanner = new Scanner(System.in);
     }

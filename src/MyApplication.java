@@ -5,6 +5,9 @@ import factories.ControllerFactory;
 import models.*;
 import repositories.*;
 
+import utils.DateValidator;
+import utils.InputValidator;
+
 import java.sql.SQLException;
 import java.util.*;
 
@@ -38,8 +41,15 @@ public class MyApplication {
             System.out.println("0. Exit");
             System.out.print("Choose an option: ");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            int choice;
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input! Please enter a number.");
+                scanner.nextLine();
+                continue;
+            }
 
             switch(choice){
                 case 1 -> register();
@@ -53,28 +63,64 @@ public class MyApplication {
         }
     }
 
-    public void register(){
+    public void register() {
         System.out.println("\n=== Registration ===");
-        System.out.print("Enter first name: ");
-        String firstName = scanner.nextLine();
-        System.out.print("Enter last name: ");
-        String lastName = scanner.nextLine();
-        System.out.print("Enter email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-        System.out.print("Enter phone number: ");
-        String phone = scanner.nextLine();
 
-        Customer customer = new Customer(firstName, lastName, email, password,phone,null);
+        String firstName;
+        do {
+            System.out.print("Enter first name: ");
+            firstName = scanner.nextLine();
+            if (!InputValidator.isValidName(firstName)) {
+                System.out.println("Invalid name! Use only letters.");
+            }
+        } while (!InputValidator.isValidName(firstName));
+
+        String lastName;
+        do {
+            System.out.print("Enter last name: ");
+            lastName = scanner.nextLine();
+            if (!InputValidator.isValidName(lastName)) {
+                System.out.println("Invalid last name! Use only letters.");
+            }
+        } while (!InputValidator.isValidName(lastName));
+
+        String email;
+        do {
+            System.out.print("Enter email: ");
+            email = scanner.nextLine();
+            if (!InputValidator.isValidEmail(email)) {
+                System.out.println("Invalid email format! Example: user@example.com");
+            }
+        } while (!InputValidator.isValidEmail(email));
+
+        String password;
+        do {
+            System.out.print("Enter password: ");
+            password = scanner.nextLine();
+            if (!InputValidator.isValidPassword(password)) {
+                System.out.println("Password must be at least 8 characters, contain letters and numbers.");
+            }
+        } while (!InputValidator.isValidPassword(password));
+
+        String phone;
+        do {
+            System.out.print("Enter phone number: ");
+            phone = scanner.nextLine();
+            if (!InputValidator.isValidPhoneNumber(phone)) {
+                System.out.println("Invalid phone number! Only digits, at least 10 characters.");
+            }
+        } while (!InputValidator.isValidPhoneNumber(phone));
+
+        Customer customer = new Customer(firstName, lastName, email, password, phone, null);
         String response = customerController.createCustomer(customer);
 
-        if(response.contains("successfully")){
+        if (response.contains("successfully")) {
             System.out.println("Registration successful! Please log in.");
         } else {
             System.out.println("Registration failed! Please try again.");
         }
     }
+
 
     public void loginSystem() {
         System.out.println("\n=== Login System ===");
@@ -146,20 +192,37 @@ public class MyApplication {
         int roomId = scanner.nextInt();
         scanner.nextLine();
 
-        System.out.print("Enter check-in date (YYYY-MM-DD): ");
-        String checkIn = scanner.nextLine();
-        System.out.print("Enter check-out date (YYYY-MM-DD): ");
-        String checkOut = scanner.nextLine();
+        // Ввод и проверка даты заезда
+        String checkIn;
+        do {
+            System.out.print("Enter check-in date (YYYY-MM-DD): ");
+            checkIn = scanner.nextLine();
+            if (!DateValidator.isCheckInValid(checkIn)) {
+                System.out.println("Invalid check-in date! It must be in format YYYY-MM-DD and not in the past.");
+            }
+        } while (!DateValidator.isCheckInValid(checkIn));
 
+        // Ввод и проверка даты выезда
+        String checkOut;
+        do {
+            System.out.print("Enter check-out date (YYYY-MM-DD): ");
+            checkOut = scanner.nextLine();
+            if (!DateValidator.isCheckOutValid(checkIn, checkOut)) {
+                System.out.println("Invalid check-out date! It must be after the check-in date.");
+            }
+        } while (!DateValidator.isCheckOutValid(checkIn, checkOut));
+
+        // Создаем бронь после валидации
         Booking booking = new Booking(currentCustomer.getId(), roomId, checkIn, checkOut, "booked", null);
         String response = bookingController.createBooking(booking);
 
         if (response.contains("successfully")) {
-            System.out.println("Booking confirmed! Please make a payment at our reseption using your Booking ID, which you can find in 'View My Bookings");
+            System.out.println("Booking confirmed! Please make a payment at our reception using your Booking ID.");
         } else {
             System.out.println("Booking failed! Try again.");
         }
     }
+
 
 
     private void showMyBookings() {

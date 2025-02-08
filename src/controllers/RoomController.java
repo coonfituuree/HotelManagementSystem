@@ -13,6 +13,10 @@ public class RoomController implements IRoomController {
         this.repository = repository;
     }
 
+    public String deleteRoomByNumber(String roomNumber) {
+        return repository.deleteRoomByNumber(roomNumber);
+    }
+
     @Override
     public String createRoom(Room room) {
         boolean created = repository.createRoom(room);

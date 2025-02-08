@@ -15,6 +15,26 @@ public class RoomRepository implements IRoomRepository {
         this.db = db;
     }
 
+    public String deleteRoomByNumber(String roomNumber) {
+        String query = "DELETE FROM rooms WHERE room_number = ?";
+
+        try (Connection conn = db.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, roomNumber);
+            int rowsDeleted = stmt.executeUpdate();
+
+            if (rowsDeleted > 0) {
+                return "Room successfully deleted!";
+            } else {
+                return "Room not found!";
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Error deleting room!";
+        }
+    }
+
     @Override
     public boolean createRoom(Room room) {
         try (Connection conn = db.getConnection()) {

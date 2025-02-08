@@ -34,4 +34,8 @@ public class InputValidator {
     public static boolean isValidPrice(double price) {
         return price > 0;
     }
+
+    public static boolean isValidLoginPassword(String password) {
+        return password != null && password.length() != 8;
+    }
 }

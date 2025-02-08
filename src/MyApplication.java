@@ -253,6 +253,7 @@ public class MyApplication {
         menuActions.put(2, () -> { cancelBooking(); });
         menuActions.put(3, () -> { showRooms1(); });
         menuActions.put(4, () -> { addRoom(); });
+        menuActions.put(5, () -> { deleteRoom(); });
         menuActions.put(0, () -> {
             System.out.println("Logging out...");
         });
@@ -263,6 +264,7 @@ public class MyApplication {
             System.out.println("2. Cancel a booking");
             System.out.println("3. View all rooms");
             System.out.println("4. Add a new room");
+            System.out.println("5. Delete a room");
             System.out.println("0. Logout");
             System.out.print("Choose an option: ");
 
@@ -291,15 +293,31 @@ public class MyApplication {
 
     private void addRoom() {
         System.out.println("\n=== Add New Room ===");
-        System.out.print("Enter room number: ");
-        String roomNumber = scanner.nextLine();
+        String roomNumber;
+        do {
+            System.out.print("Enter room number: ");
+            roomNumber = scanner.nextLine();
+            if (!InputValidator.isValidRoomNumber(roomNumber)) {
+                System.out.println("Invalid room number! Only digits allowed.");
+            }
+        } while (!InputValidator.isValidRoomNumber(roomNumber));
 
         System.out.print("Enter room type (Single/Double/Suite): ");
         String roomType = scanner.nextLine();
 
-        System.out.print("Enter price per night: ");
-        double price = scanner.nextDouble();
-        scanner.nextLine();
+        double price;
+        do {
+            System.out.print("Enter price per night: ");
+            while (!scanner.hasNextDouble()) {
+                System.out.println("Invalid price! Must be a positive number.");
+                scanner.next();
+            }
+            price = scanner.nextDouble();
+            scanner.nextLine(); // Очищаем буфер ввода
+            if (!InputValidator.isValidPrice(price)) {
+                System.out.println("Invalid price! Must be greater than 0.");
+            }
+        } while (!InputValidator.isValidPrice(price));
 
         System.out.print("Enter status (Available/Booked): ");
         String status = scanner.nextLine();
@@ -311,6 +329,25 @@ public class MyApplication {
             System.out.println("Room added successfully!");
         } else {
             System.out.println("Failed to add room. Try again.");
+        }
+    }
+    private void deleteRoom() {
+        System.out.println("\n=== Delete Room ===");
+        String roomNumber;
+        do {
+            System.out.print("Enter room number to delete: ");
+            roomNumber = scanner.nextLine();
+            if (!InputValidator.isValidRoomNumber(roomNumber)) {
+                System.out.println("Invalid room number! Only digits allowed.");
+            }
+        } while (!InputValidator.isValidRoomNumber(roomNumber));
+
+        String response = roomController.deleteRoomByNumber(roomNumber);
+
+        if (response.contains("successfully")) {
+            System.out.println("Room deleted successfully!");
+        } else {
+            System.out.println("Failed to delete room. Room not found or an error occurred.");
         }
     }
     private void showAllBookings() {

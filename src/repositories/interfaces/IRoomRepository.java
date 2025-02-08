@@ -11,4 +11,6 @@ public interface IRoomRepository {
 
     // ДОбавляем метод поиска свободных комнат
     List<Room> findAvailableRooms(String checkIn, String checkOut, double maxPrice);
+
+    String deleteRoomByNumber(String roomNumber);
 }

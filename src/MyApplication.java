@@ -1,5 +1,6 @@
 import controllers.*;
 import data.PostgreDB;
+import data.interfaces.IDB;
 import models.*;
 import repositories.*;
 
@@ -15,11 +16,11 @@ public class MyApplication {
     private Customer currentCustomer = null;
 
     public MyApplication() {
-        PostgreDB db = new PostgreDB(
-                "localhost",       // Сервер
-                "postgres",        // Логин (замени, если у тебя другой)
-                "1234",            // Пароль (замени на свой)
-                "DBManagementSystem" // Название БД
+        IDB db = new PostgreDB(
+                "localhost",
+                "postgres",
+                "1234",
+                "DBManagementSystem"
         );
 
         this.customerController = new CustomerController(new CustomerRepository(db));
@@ -35,8 +36,7 @@ public class MyApplication {
         while(true){
             System.out.println("\n===HOTEL MANAGEMENT SYSTEM===");
             System.out.println("1. Register");
-            System.out.println("2. Login as Customer");
-            System.out.println("3. Login as Administrator");
+            System.out.println("2. Login");
             System.out.println("0. Exit");
             System.out.print("Choose an option: ");
 
@@ -45,8 +45,7 @@ public class MyApplication {
 
             switch(choice){
                 case 1 -> register();
-                case 2 -> loginCustomer();
-                case 3 -> loginAdministrator();
+                case 2 -> loginSystem();
                 case 0 -> {
                     System.out.println("Exiting...");
                     return;
@@ -79,25 +78,35 @@ public class MyApplication {
         }
     }
 
-    public void loginCustomer() {
-        System.out.println("\n=== Login ===");
-        System.out.print("Enter email: ");
-        String email = scanner.nextLine();
+    public void loginSystem() {
+        System.out.println("\n=== Login System ===");
+        System.out.print("Enter email or username: ");
+        String identifier = scanner.nextLine();
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        Optional.ofNullable(customerController.getCustomerByEmail(email))
-                .filter(customer -> customer.getPassword().equals(password))
-                .ifPresentOrElse(
-                        customer -> {
-                            currentCustomer = customer;
-                            System.out.println("Login successful! Welcome, " + customer.getFirst_name() + "!");
-                            customerMainMenu();
-                        },
-                        () -> System.out.println("Invalid email or password! Please try again.")
-                );
-    }
+        // CUSTOMER CHECK
+        Optional<Customer> customerOpt = Optional.ofNullable(customerController.getCustomerByEmail(identifier));
 
+        if (customerOpt.isPresent() && customerOpt.get().getPassword().equals(password)) {
+            currentCustomer = customerOpt.get();
+            System.out.println("Login successful! Welcome, " + currentCustomer.getFirst_name() + "!");
+            customerMainMenu();
+            return;
+        }
+
+        //ADMIN CHECK
+        Optional<Admin> adminOpt = Optional.ofNullable(adminController.getAdminByUsername(identifier));
+
+        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
+            System.out.println("Login successful! Welcome, " + adminOpt.get().getUsername() + "!");
+            adminMainMenu();
+            return;
+        }
+
+        // If no match is found
+        System.out.println("Invalid email/username or password! Please try again.");
+    }
 
     private void customerMainMenu() {
         while (true) {
@@ -176,29 +185,9 @@ public class MyApplication {
         }
     }
 
-    private void loginAdministrator() {
-        System.out.println("\n=== Administrator Login ===");
-        System.out.print("Enter admin username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter admin password (min. 128 digits): ");
-        String password = scanner.nextLine();
-
-        Optional.ofNullable(adminController.getAdminByUsername(username))
-                .filter(admin -> Objects.equals(admin.getPassword(), password)) // Проверка пароля
-                .ifPresentOrElse(
-                        admin -> {
-                            System.out.println("Login successful! Welcome, " + admin.getUsername() + "!");
-                            adminMainMenu();
-                        },
-                        () -> System.out.println("Invalid username or password! Please try again.")
-                );
-    }
-
 
     private void adminMainMenu() {
         Map<Integer, Runnable> menuActions = new HashMap<>();
-
-        // Полные лямбда-выражения
         menuActions.put(1, () -> { showAllBookings(); });
         menuActions.put(2, () -> { cancelBooking(); });
         menuActions.put(3, () -> { showRooms1(); });
@@ -291,5 +280,4 @@ public class MyApplication {
                     System.out.println(bookingController.cancelBooking(bookingId));
                 });
     }
-
 }

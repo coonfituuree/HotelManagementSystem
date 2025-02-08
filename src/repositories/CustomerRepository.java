@@ -107,7 +107,7 @@ public class CustomerRepository implements ICustomerRepository {
                         rs.getString("created_at")
                 );
             } else {
-                System.out.println("DEBUG: No customer found in DB with email: " + email);
+                System.out.println("");
             }
         } catch (SQLException e) {
             System.out.println("SQL Error: " + e.getMessage());

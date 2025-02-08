@@ -23,7 +23,6 @@ public class PostgreDB implements IDB {
             if (connection == null || connection.isClosed()) {
                 Class.forName("org.postgresql.Driver");
                 connection = DriverManager.getConnection(connectionUrl, username, password);
-                System.out.println("Connected to database.");
             }
         } catch (Exception e) {
             System.out.println("Failed to connect to database: " + e.getMessage());

@@ -157,6 +157,7 @@ public class MyApplication {
             System.out.println("\n=== CUSTOMER MENU ===");
             System.out.println("1. View all rooms");
             System.out.println("2. View my bookings");
+            System.out.println("3. Make a Payment");
             System.out.println("0. Logout");
             System.out.print("Choose an option: ");
 
@@ -166,6 +167,7 @@ public class MyApplication {
             switch (choice) {
                 case 1 -> showRooms();
                 case 2 -> showMyBookings();
+                case 3 -> paymentmenu();
                 case 0 -> {
                     currentCustomer = null;
                     System.out.println("Logged out successfully.");
@@ -174,6 +176,31 @@ public class MyApplication {
                 default -> System.out.println("Invalid option! Try again.");
             }
         }
+    }
+
+    private void paymentmenu() {
+        System.out.println("\n=== PAYMENT MENU: ===");
+        System.out.println("1. Make a Payment");
+        System.out.println("2. View My Bookings");
+        System.out.println("0. Exit");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1 -> makeapayment();
+            case 2 -> showMyBookings();
+            case 0 -> {
+                System.out.println("Exiting...");
+                return;
+            }
+            default -> System.out.println("Invalid option! Try again.");
+        }
+        
+    }
+    private void makeapayment() {
+        System.out.println("\n=== Make a Payment");
+        System.out.print("Make a Payment with Booking ID: ");
+
     }
     private void showRooms() {
         System.out.println("\n=== All Rooms ===");
